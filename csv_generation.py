@@ -1,7 +1,7 @@
 import json, time
 import pandas as pd
 
-filename_prefix = 'Yelp_Dataset/yelp_academic_dataset_'
+filename_prefix = 'yelp_dataset/yelp_academic_dataset_'
 all_suffixes = ['business', 'review', 'user']
 filepaths = [filename_prefix + suffix + '.json' for suffix in all_suffixes]
 csv_filepaths = [filename_prefix + suffix + '.csv' for suffix in all_suffixes]
@@ -63,6 +63,8 @@ try:
 except:
     print('No csv files found')
     dataframes = read_write_json_data()
+
+print('All files read and dataframes created!')
 
 all_dataframes = {
 'business': dataframes[0],
