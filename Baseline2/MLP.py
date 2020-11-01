@@ -12,11 +12,11 @@ import theano
 import theano.tensor as T
 import keras
 from keras import backend as K
-from keras import initializations
-from keras.regularizers import l2, activity_l2
-from keras.models import Sequential, Graph, Model
+from keras import initializers
+from keras.regularizers import l2#, activity_l2
+from keras.models import Sequential, Model # Graph,
 from keras.layers.core import Dense, Lambda, Activation
-from keras.layers import Embedding, Input, Dense, merge, Reshape, Merge, Flatten, Dropout
+from keras.layers import Embedding, Input, Dense, Reshape, Flatten, Dropout, Concatenate
 from keras.constraints import maxnorm
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 from evaluate import evaluate_model
@@ -53,8 +53,9 @@ def parse_args():
                         help='Whether to save the trained model.')
     return parser.parse_args()
 
-def init_normal(shape, name=None):
-    return initializations.normal(shape, scale=0.01, name=name)
+def init_normal(shape, dtype = None, name=None):
+    # RandomNormal does not have scale and name
+    return initializers.RandomNormal(shape) # scale=0.01, , name=name
 
 def get_model(num_users, num_items, layers = [20,10], reg_layers=[0,0]):
     assert len(layers) == len(reg_layers)
@@ -73,10 +74,10 @@ def get_model(num_users, num_items, layers = [20,10], reg_layers=[0,0]):
     item_latent = Flatten()(MLP_Embedding_Item(item_input))
     
     # The 0-th layer is the concatenation of embedding layers
-    vector = merge([user_latent, item_latent], mode = 'concat')
+    vector = Concatenate()([user_latent, item_latent])
     
     # MLP layers
-    for idx in xrange(1, num_layer):
+    for idx in range(1, num_layer):
         layer = Dense(layers[idx], W_regularizer= l2(reg_layers[idx]), activation='relu', name = 'layer%d' %idx)
         vector = layer(vector)
         
@@ -97,7 +98,7 @@ def get_train_instances(train, num_negatives):
         item_input.append(i)
         labels.append(1)
         # negative instances
-        for t in xrange(num_negatives):
+        for t in range(num_negatives):
             j = np.random.randint(num_items)
             while train.has_key((u, j)):
                 j = np.random.randint(num_items)
@@ -151,7 +152,7 @@ if __name__ == '__main__':
     
     # Train model
     best_hr, best_ndcg, best_iter = hr, ndcg, -1
-    for epoch in xrange(epochs):
+    for epoch in range(epochs):
         t1 = time()
         # Generate training instances
         user_input, item_input, labels = get_train_instances(train, num_negatives)
