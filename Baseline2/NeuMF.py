@@ -71,16 +71,28 @@ def get_model(num_users, num_items, mf_dim=10, layers=[10], reg_layers=[0], reg_
     item_input = Input(shape=(1,), dtype='int32', name = 'item_input')
     
     # Embedding layer
-    MF_Embedding_User = Embedding(input_dim = num_users, output_dim = mf_dim, name = 'mf_embedding_user',
-                                  init = init_normal, W_regularizer = l2(reg_mf), input_length=1)
-    MF_Embedding_Item = Embedding(input_dim = num_items, output_dim = mf_dim, name = 'mf_embedding_item',
-                                  init = init_normal, W_regularizer = l2(reg_mf), input_length=1)   
+    # MF_Embedding_User = Embedding(input_dim = num_users, output_dim = mf_dim, name = 'mf_embedding_user',
+    #                               init = init_normal, W_regularizer = l2(reg_mf), input_length=1)
+    # MF_Embedding_Item = Embedding(input_dim = num_items, output_dim = mf_dim, name = 'mf_embedding_item',
+    #                               init = init_normal, W_regularizer = l2(reg_mf), input_length=1)
 
-    MLP_Embedding_User = Embedding(input_dim = num_users, output_dim = layers[0]/2, name = "mlp_embedding_user",
-                                  init = init_normal, W_regularizer = l2(reg_layers[0]), input_length=1)
-    MLP_Embedding_Item = Embedding(input_dim = num_items, output_dim = layers[0]/2, name = 'mlp_embedding_item',
-                                  init = init_normal, W_regularizer = l2(reg_layers[0]), input_length=1)   
-    
+    MF_Embedding_User = Embedding(input_dim=num_users, output_dim=mf_dim, name='mf_embedding_user',
+                                  embeddings_initializer='random_normal', W_regularizer=l2(reg_mf), input_length=1)
+    MF_Embedding_Item = Embedding(input_dim=num_items, output_dim=mf_dim, name='mf_embedding_item',
+                                  embeddings_initializer='random_normal', W_regularizer=l2(reg_mf), input_length=1)
+
+
+    # MLP_Embedding_User = Embedding(input_dim = num_users, output_dim = layers[0]/2, name = "mlp_embedding_user",
+    #                               init = init_normal, W_regularizer = l2(reg_layers[0]), input_length=1)
+    # MLP_Embedding_Item = Embedding(input_dim = num_items, output_dim = layers[0]/2, name = 'mlp_embedding_item',
+    #                               init = init_normal, W_regularizer = l2(reg_layers[0]), input_length=1)
+
+    MLP_Embedding_User = Embedding(input_dim=num_users, output_dim=int(layers[0] / 2), name="mlp_embedding_user",
+                                   embeddings_initializer='random_normal', W_regularizer=l2(reg_layers[0]), input_length=1)
+    MLP_Embedding_Item = Embedding(input_dim=num_items, output_dim=int(layers[0] / 2), name='mlp_embedding_item',
+                                   embeddings_initializer='random_normal', W_regularizer=l2(reg_layers[0]), input_length=1)
+
+
     # MF part
     mf_user_latent = Flatten()(MF_Embedding_User(user_input))
     mf_item_latent = Flatten()(MF_Embedding_Item(item_input))
@@ -134,9 +146,15 @@ def load_pretrain_model(model, gmf_model, mlp_model, num_layers):
     return model
 
 def get_train_instances(train, num_negatives):
-    user_input, item_input, labels = [],[],[]
-    num_users = train.shape[0]
+    user_input, item_input, labels = [], [], []
+    # num_users = train.shape[0]
+    s1 = set(train.keys())
+    i1 = 0
+    verb = 100000
     for (u, i) in train.keys():
+        i1 += 1
+        if i1 % verb == 0:
+            print(i1)
         # positive instance
         user_input.append(u)
         item_input.append(i)
@@ -144,11 +162,12 @@ def get_train_instances(train, num_negatives):
         # negative instances
         for t in range(num_negatives):
             j = np.random.randint(num_items)
-            while train.has_key((u, j)):
+            while (u, j) in s1:
                 j = np.random.randint(num_items)
             user_input.append(u)
             item_input.append(j)
             labels.append(0)
+
     return user_input, item_input, labels
 
 if __name__ == '__main__':

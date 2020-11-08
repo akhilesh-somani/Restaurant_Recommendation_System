@@ -62,9 +62,9 @@ def get_model(num_users, num_items, latent_dim, regs=[0,0]):
     item_input = Input(shape=(1,), dtype='int32', name = 'item_input')
 
     MF_Embedding_User = Embedding(input_dim = num_users, output_dim = latent_dim, name = 'user_embedding',
-                                  init = init_normal, W_regularizer = l2(regs[0]), input_length=1)
+                                  embeddings_initializer='random_normal', W_regularizer = l2(regs[0]), input_length=1)
     MF_Embedding_Item = Embedding(input_dim = num_items, output_dim = latent_dim, name = 'item_embedding',
-                                  init = init_normal, W_regularizer = l2(regs[1]), input_length=1)   
+                                  embeddings_initializer='random_normal', W_regularizer = l2(regs[1]), input_length=1)
     
     # Crucial to flatten an embedding vector!
     user_latent = Flatten()(MF_Embedding_User(user_input))
