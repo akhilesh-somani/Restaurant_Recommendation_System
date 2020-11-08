@@ -1,0 +1,8 @@
+Potential improvements over neural collaborative filtering (NCF):
+
+-> Pg 3: The work only uses the identity of the user and item as inputs (using one-hot encoding) for training and predicting the user-item interaction. However, an extension can be to use content features for users and items for better predictions
+
+-> Pg 3: Pointwise loss has been used to train the model, however, another way to train the model is by performing the pairwise learning (such as Bayesian Personalized Ranking and margin-based loss) of the NCF
+
+-> Pg 4: The work used uniform sampling to sample the unobserved user-item iteractions, however, item-popularity based sampling approaches might work better and can be explored
+
