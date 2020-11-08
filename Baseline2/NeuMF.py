@@ -149,12 +149,8 @@ def get_train_instances(train, num_negatives):
     user_input, item_input, labels = [], [], []
     # num_users = train.shape[0]
     s1 = set(train.keys())
-    i1 = 0
-    verb = 100000
+
     for (u, i) in train.keys():
-        i1 += 1
-        if i1 % verb == 0:
-            print(i1)
         # positive instance
         user_input.append(u)
         item_input.append(i)

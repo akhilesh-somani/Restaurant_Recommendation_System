@@ -89,9 +89,12 @@ def get_model(num_users, num_items, layers = [20,10], reg_layers=[0,0]):
     
     return model
 
+
 def get_train_instances(train, num_negatives):
-    user_input, item_input, labels = [],[],[]
-    num_users = train.shape[0]
+    user_input, item_input, labels = [], [], []
+    # num_users = train.shape[0]
+    s1 = set(train.keys())
+
     for (u, i) in train.keys():
         # positive instance
         user_input.append(u)
@@ -100,11 +103,12 @@ def get_train_instances(train, num_negatives):
         # negative instances
         for t in range(num_negatives):
             j = np.random.randint(num_items)
-            while train.has_key((u, j)):
+            while (u, j) in s1:
                 j = np.random.randint(num_items)
             user_input.append(u)
             item_input.append(j)
             labels.append(0)
+
     return user_input, item_input, labels
 
 if __name__ == '__main__':
@@ -164,7 +168,7 @@ if __name__ == '__main__':
         t2 = time()
 
         # Evaluation
-        if epoch %verbose == 0:
+        if epoch % verbose == 0:
             (hits, ndcgs) = evaluate_model(model, testRatings, testNegatives, topK, evaluation_threads)
             hr, ndcg, loss = np.array(hits).mean(), np.array(ndcgs).mean(), hist.history['loss'][0]
             print('Iteration %d [%.1f s]: HR = %.4f, NDCG = %.4f, loss = %.4f [%.1f s]' 
