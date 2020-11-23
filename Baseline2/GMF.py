@@ -51,9 +51,9 @@ def parse_args():
                         help='Whether to save the trained model.')
     return parser.parse_args()
 
-def init_normal(shape, dtype = None, name=None):
-    # RandomNormal does not have scale and name
-    return initializers.RandomNormal(shape)  # scale=0.01, , name=name
+# def init_normal(shape, dtype = None, name=None):
+#     # RandomNormal does not have scale and name
+#     return initializers.RandomNormal(shape)  # scale=0.01, , name=name
 
 
 def get_model(num_users, num_items, latent_dim, regs=[0,0]):
