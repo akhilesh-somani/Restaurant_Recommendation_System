@@ -7,26 +7,20 @@ He Xiangnan et al. Neural Collaborative Filtering. In WWW 2017.
 @author: Xiangnan He (xiangnanhe@gmail.com)
 '''
 import numpy as np
-import theano.tensor as T
 import keras
-from keras import backend as K
-from keras import initializers
 from keras.models import Sequential, Model, load_model, save_model
-from keras.layers.core import Dense, Lambda, Activation
 from keras.layers import Embedding, Input, Dense, Concatenate, Reshape, Flatten, Multiply
 from keras.optimizers import Adagrad, Adam, SGD, RMSprop
 from keras.regularizers import l2
 from Dataset import Dataset
 from evaluate import evaluate_model
 from time import time
-import multiprocessing as mp
-import sys
-import math
 import argparse
 
 #################### Arguments ####################
 def parse_args():
     parser = argparse.ArgumentParser(description="Run GMF.")
+
     parser.add_argument('--path', nargs='?', default='Data/',
                         help='Input data path.')
     parser.add_argument('--dataset', nargs='?', default='ml-1m',
@@ -51,55 +45,40 @@ def parse_args():
                         help='Whether to save the trained model.')
     return parser.parse_args()
 
-# def init_normal(shape, dtype = None, name=None):
-#     # RandomNormal does not have scale and name
-#     return initializers.RandomNormal(shape)  # scale=0.01, , name=name
-
-
-def get_model(num_users, num_items, latent_dim, regs=[0,0]):
+def get_model(num_users, num_items, latent_dim, regs=[0, 0]):
     # Input variables
-    user_input = Input(shape=(1,), dtype='int32', name = 'user_input')
-    item_input = Input(shape=(1,), dtype='int32', name = 'item_input')
+    user_input = Input(shape=(1,), dtype='int32', name='user_input')
+    item_input = Input(shape=(1,), dtype='int32', name='item_input')
 
-    MF_Embedding_User = Embedding(input_dim = num_users, output_dim = latent_dim, name = 'user_embedding',
-                                  embeddings_initializer='random_normal', W_regularizer = l2(regs[0]), input_length=1)
-    MF_Embedding_Item = Embedding(input_dim = num_items, output_dim = latent_dim, name = 'item_embedding',
-                                  embeddings_initializer='random_normal', W_regularizer = l2(regs[1]), input_length=1)
-    
+    MF_Embedding_User = Embedding(input_dim=num_users, output_dim=latent_dim, name='user_embedding',
+                                  embeddings_initializer='random_normal', embeddings_regularizer=l2(regs[0]),
+                                  input_length=1)
+    MF_Embedding_Item = Embedding(input_dim=num_items, output_dim=latent_dim, name='item_embedding',
+                                  embeddings_initializer='random_normal', embeddings_regularizer=l2(regs[1]),
+                                  input_length=1)
+
     # Crucial to flatten an embedding vector!
     user_latent = Flatten()(MF_Embedding_User(user_input))
     item_latent = Flatten()(MF_Embedding_Item(item_input))
-    
-    # Element-wise product of user and item embeddings 
+
+    # Element-wise product of user and item embeddings
     predict_vector = Multiply()([user_latent, item_latent])
-    
+
     # Final prediction layer
-    #prediction = Lambda(lambda x: K.sigmoid(K.sum(x)), output_shape=(1,))(predict_vector)
-    prediction = Dense(1, activation='sigmoid', init='lecun_uniform', name = 'prediction')(predict_vector)
-    
-    model = Model(input=[user_input, item_input], 
-                output=prediction)
+    prediction = Dense(1, activation='sigmoid', kernel_initializer='lecun_uniform', name='prediction')(predict_vector)
+
+    model = Model(inputs=[user_input, item_input], outputs=prediction)
 
     return model
 
-def get_train_instances(train, num_negatives):
+def get_train_instances(train, labelRatings):
     user_input, item_input, labels = [], [], []
-    # num_users = train.shape[0]
-    s1 = set(train.keys())
 
-    for (u, i) in train.keys():
+    for i in range(len(train)):
         # positive instance
-        user_input.append(u)
-        item_input.append(i)
-        labels.append(1)
-        # negative instances
-        for t in range(num_negatives):
-            j = np.random.randint(num_items)
-            while (u, j) in s1:
-                j = np.random.randint(num_items)
-            user_input.append(u)
-            item_input.append(j)
-            labels.append(0)
+        user_input.append(train[i][0])
+        item_input.append(train[i][1])
+        labels.append(labelRatings[i])
 
     return user_input, item_input, labels
 
