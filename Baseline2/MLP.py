@@ -53,10 +53,6 @@ def parse_args():
                         help='Whether to save the trained model.')
     return parser.parse_args()
 
-def init_normal(shape, dtype = None, name=None):
-    # RandomNormal does not have scale and name
-    return initializers.RandomNormal(shape) # scale=0.01, , name=name
-
 def get_model(num_users, num_items, layers = [20,10], reg_layers=[0,0]):
     assert len(layers) == len(reg_layers)
     num_layer = len(layers) #Number of layers in the MLP
