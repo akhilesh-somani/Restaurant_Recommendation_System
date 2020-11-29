@@ -1,11 +1,13 @@
 # Restaurant_Recommendation_System
 ## Yelp Dataset
 
-Before running the code:
+Step 1: Before running the code:
 (i) Download and unzip the JSON files from: https://www.yelp.com/dataset
 (ii) Create a folder called 'yelp_dataset' in the current working directory to store all the JSON files
 
 Refer to https://www.yelp.com/dataset/documentation/main for documentation of the data
+
+Step 2: Then run the 'Data_Cleaning_&_Baseline1.ipynb' file to clean the data, extract relevant features, create useful csv files and run baseline1
 
 Python Modules:
 -> csv_generation.py: creates pandas dataframes from JSON files ('yelp_dataset/<JSON_filename>.json') and also stores them as csv files in 'yelp_dataset' folder. If the csv files are already present, loads them as pandas dataframes directly
