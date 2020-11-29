@@ -17,4 +17,3 @@ Python Modules:
 Datasets (in yelp_dataset folder within the current working director):
 -> champaign_user_item.csv -> restaurant data (user-item review information) for Urbana-Champaign
 -> toronto_user_item.csv -> restaurant data (user-item review information) for Toronto
-
